@@ -1,0 +1,10 @@
+TODO :
+- Create parsing (if nbr_cycle = 0 or !list.head return error instantly)
+- Stock data properly and potentially decide of where to place programs
+- Run main loop "execute next instruction"
+  - Find the instruction with the lowest "before next cycle"
+  (if two instructions have the same amount, keep the one with the lowest number)
+  - Add that amount to the total cycles, substract from everything else
+  - If (instruction_cycles > cycles_until_signal) then choose to send the signal instead.
+  - Implies checking for potentially dead processes and killing them.
+  - Execute the instruction (must have a complete function per instruction to execute)

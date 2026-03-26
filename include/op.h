@@ -17,6 +17,7 @@
     #include <unistd.h>
     #include <stdint.h>
     #include <stdbool.h>
+    #include <stdarg.h>
 
     /// Library includes
     #include "./../libs/c_alloc/c_alloc.h"
@@ -27,57 +28,34 @@
     // Defines
 
     /// Return codes
-    #define ROBOT_SUCC 0
-    #define ROBOT_FAIL 84
-    #define ROBOT_INTERNAL -1
+    #define COREWAR_SUCC 0
+    #define COREWAR_FAIL 84
 
     /// Global error messages
     #define ERR_ARG "Wrong amount of arguments! -h for help.\n"
-    #define ERR_ALLOC "The initialization of the alloc failed.\n"
-    #define ERR_MAIN "The allocation of the main structure failed.\n"
-
-    /// Stack error messages
-    #define STK_ENCODE "Encoding the file."
-    #define STK_INI "Initializing the main."
-    #define STK_HDR "Parsing the header."
-    #define STK_INSTR "Parsing the instructions."
-
-    #define STK_NAMEWRITTEN "Ensuring name is unique."
-    #define STK_NAMEVALID "Ensuring name line validity"
-    #define STK_CMDWRITTEN "Ensuring command is unique."
-    #define STK_CMDVALID "Ensuring command line validity."
-    #define STK_HDRFOUND "Ensuring header data was found."
-
-    #define STK_WRITEBEGIN "Writing the final data in the file."
-    #define STK_WRITEOPEN "Opening the final file."
-    #define STK_WRITEHDR "Writing the file's header."
-    #define STK_WRITEINSTR "Writing the file's instructions."
-
-    #define STK_INSTRFOUND "Ensuring instruction data was found."
-    #define STK_INSTRLABEL "Handling potential labels."
-    #define STK_INSTRSKIP "Skipping potential labels to find instruction."
-    #define STK_INSTRPARSE "Parsing single instruction."
-    #define STK_INSTRSKIP2 "Skipping potential spaces before instruction."
-    #define STK_INSTRVALID "Ensuring instruction exists and creating new node."
-    #define STK_INSTRARG "Parsing the arguments of the instruction."
-
-    #define STK_ARGSINGLE "Handling a single argument."
-    #define STK_ARGTYPE "Ensuring the fetched argument is of correct type."
-    #define STK_ARGCOUNT "Ensuring arg count is coherent."
-    #define STK_ARGVALID "Ensuring argument is valid."
-    #define STK_ARGIND "Handling register and indirect arguments."
-    #define STK_ARGDIR "Handling a direct argument."
-    #define STK_ARGDIR2 "Handling a direct normal argument."
-    #define STK_ARGLAB "Handling a label argument"
-
-    #define STK_DIR
+    #define ERR_ALLOC "The initialization failed.\n"
+    #define ERR_PARSE "The parsing of the arguments failed.\n"
+    #define ERR_EXEC "The execution of the corewar failed.\n"
 
     /// Help message
     #define HELP1 "USAGE\n"
-    #define HELP2 "./robot-factory file_name[.s]\n"
+    #define HELP2_1 "./corewar [-dump nbr_cycle] [[-n prog_number] "
+    #define HELP2_2 "[-a load_address] prog_name] ...\n"
     #define HELP3 "DESCRIPTION\n"
-    #define HELP4 "file_name file in assembly language to be converted into "
-    #define HELP5 "file_name.cor, an executable in the Virtual Machine.\n"
+    #define HELP4_1 "-dump nbr_cycle dumps the memory after the nbr_cycle "
+    #define HELP4_2 "execution (if the round isn't already over) with the "
+    #define HELP4_3 "following format: 32 bytes/line "
+    #define HELP4_4 "in hexadecimal (A0BCDEFE1DD3...)\n"
+    #define HELP5_1 "-n prog_number sets the next program's number. By "
+    #define HELP5_2 "default, the first free number in the parameter order\n"
+    #define HELP6_1 "-a load_address sets the next program's loading address. "
+    #define HELP6_2 "When no address is specified, optimize the addresses so "
+    #define HELP6_3 "that the processes are as far away from each other as "
+    #define HELP6_4 "possible. The addresses are MEM_SIZE modulo.\n"
+    #define HELP2 HELP2_1 HELP2_2
+    #define HELP4 HELP4_1 HELP4_2 HELP4_3 HELP4_4
+    #define HELP5 HELP5_1 HELP5_2
+    #define HELP6 HELP6_1 HELP6_2 HELP6_3 HELP6_4
     #define HELP HELP1 HELP2 HELP3 HELP4 HELP5
 
     /// Hardcoded values
@@ -135,7 +113,7 @@ typedef struct op_s {
 
 typedef struct program_s {
     char *program_name;
-    uint16_t cycles_since_live;
+    uint16_t since_last_live;
     size_t program_number;
     size_t program_counter;
     char registers[REG_NUMBER][REG_SIZE_INSIDE];
@@ -149,23 +127,24 @@ typedef struct program_start_s {
 } program_start_t;
 
 typedef struct start_data_s {
-    uint32_t nbr_cycle;
+    uint32_t nbr_cycle; // if = 0 then error
     linkedlist_t *program; // linkedlist of program_start_t
 } start_data_t;
 
-typedef struct main_s {
+typedef struct corewar_s {
     c_alloc_t *alloc;
     linkedlist_t *program; // linkedlist of program_t
     char memory[MEM_SIZE];
-    uint16_t CURRENT_CYCLE;
-} main_t;
+    uint32_t cycles;
+    uint16_t since_last_live;
+} corewar_t;
 
 // Imports
 extern const op_t op_tab[];
 
 // Functions
-int return_int(const int return_val, const char *msg, main_t *main);
-void *return_pointer(void *return_val, const char *msg, main_t *main);
-int parse(int argc, char **argv, main_t *main);
+int parse(int argc, char **argv, corewar_t *main);
+int execute(corewar_t *corewar);
+int print_f(const char *format, ...);
 
 #endif
