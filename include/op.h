@@ -120,22 +120,12 @@ typedef struct program_s {
     bool carry;
 } program_t;
 
-typedef struct program_start_s {
-    size_t program_number;
-    size_t program_load;
-    char *program_name;
-} program_start_t;
-
-typedef struct start_data_s {
-    uint32_t nbr_cycle; // if = 0 then error
-    linkedlist_t *program; // linkedlist of program_start_t
-} start_data_t;
-
 typedef struct corewar_s {
     c_alloc_t *alloc;
     linkedlist_t *program; // linkedlist of program_t
     char memory[MEM_SIZE];
     uint32_t cycles;
+    uint32_t max_cycles;
     uint16_t since_last_live;
 } corewar_t;
 

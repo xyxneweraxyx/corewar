@@ -37,6 +37,11 @@ static corewar_t *create_corewar(void)
         c_delete(alloc, false);
         return NULL;
     }
+    corewar->program = linkedlist_ini();
+    if (!corewar->program) {
+        c_delete(alloc, true);
+        return NULL;
+    }
     corewar->alloc = alloc;
     return corewar;
 }
