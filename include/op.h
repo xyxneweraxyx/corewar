@@ -36,6 +36,7 @@
     #define ERR_ALLOC "The initialization failed.\n"
     #define ERR_PARSE "The parsing of the arguments failed.\n"
     #define ERR_EXEC "The execution of the corewar failed.\n"
+    #define ERR_WRITER "The writer found a file that does not conform.\n"
 
     /// Help message
     #define HELP1 "USAGE\n"
@@ -62,6 +63,7 @@
     #define MEM_SIZE 6 * 1024
     #define IDX_MOD 512
     #define MAX_ARGS_NUMBER 4
+    #define COREWAR_EXEC_MAGIC 0xea83f3
 
     #define CYCLE_TO_DIE 1536
     #define CYCLE_DELTA 5
@@ -138,8 +140,15 @@ typedef struct corewar_s {
 extern const op_t op_tab[];
 
 // Functions
+
+/// Main functions
 int parse(int argc, char **argv, corewar_t *main);
 int execute(corewar_t *corewar);
-int print_f(const char *format, ...);
+int writer(corewar_t *corewar);
+
+/// Endianness & reading functions
+uint16_t char_to_uint16(const char *bytes);
+uint32_t char_to_uint32(const char *bytes);
+uint64_t char_to_uint64(const char *bytes);
 
 #endif

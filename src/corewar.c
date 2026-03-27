@@ -10,7 +10,7 @@
 int return_int(const int return_val, const char *msg, corewar_t *main)
 {
     if (msg)
-        print_f("%s", msg);
+        write(STDERR_FILENO, msg, str_len(msg));
     if (main)
         c_delete(main->alloc, true);
     return return_val;
@@ -19,7 +19,7 @@ int return_int(const int return_val, const char *msg, corewar_t *main)
 void *return_pointer(void *return_val, const char *msg, corewar_t *main)
 {
     if (msg)
-        print_f("%s", msg);
+        write(STDERR_FILENO, msg, str_len(msg));
     if (main)
         c_delete(main->alloc, true);
     return return_val;
@@ -59,7 +59,9 @@ int main(int argc, char **argv)
         return return_int(COREWAR_FAIL, ERR_ALLOC, NULL);
     if (parse(argc, argv, corewar) == COREWAR_FAIL)
         return return_int(COREWAR_FAIL, ERR_PARSE, corewar);
-     if (execute(corewar) == COREWAR_FAIL)
+    if (writer(corewar) == COREWAR_FAIL)
+        return return_int(COREWAR_FAIL, ERR_WRITER, corewar);
+    if (execute(corewar) == COREWAR_FAIL)
         return return_int(COREWAR_FAIL, ERR_EXEC, corewar);
     return return_int(COREWAR_SUCC, NULL, corewar);
 }
