@@ -64,6 +64,7 @@
     #define MEM_SIZE 6 * 1024
     #define IDX_MOD 512
     #define MAX_ARGS_NUMBER 4
+    #define INSTR_AMT 16
 
     #define COREWAR_EXEC_MAGIC 0xea83f3
     #define PROG_NAME_LENGTH 128
@@ -126,6 +127,7 @@ typedef struct op_s {
 typedef struct program_s {
     char *program_name;
     uint16_t since_last_live;
+    uint16_t until_next_instr;
     size_t program_number;
     size_t program_counter;
     core_reg_t registers[REG_NUMBER];
@@ -138,8 +140,12 @@ typedef struct corewar_s {
     uint8_t memory[MEM_SIZE];
     uint32_t cycles;
     uint32_t max_cycles;
+    uint16_t per_live;
+    uint16_t live_signals;
     uint16_t since_last_live;
 } corewar_t;
+
+typedef int (*instr_func_t)(corewar_t *, program_t *);
 
 // Imports
 extern const op_t op_tab[];

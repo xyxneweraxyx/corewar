@@ -8,3 +8,9 @@ TODO :
   - If (instruction_cycles > cycles_until_signal) then choose to send the signal instead.
   - Implies checking for potentially dead processes and killing them.
   - Execute the instruction (must have a complete function per instruction to execute)
+
+QUESTIONS DE FONCTIONNEMENT A REPONDRE POUR UN PROGRAMME QUI CORRESPOND A LA REALITE :
+1/ est-ce qu'on tue un programme dès qu'il dépasse le nombre de cycles autorisés, OU ALORS
+est-ce que c'est le SIGNAL émit par le "main" qui va tuer tout les process, indépendamment de leur volonté ?
+2/ est-ce que DELTA est appliqué en même temps qu'on loop (et reçoit des signaux de vie)
+ou alors est-ce que on update delta qu'une fois le signal envoyé et complètement fini ?
