@@ -11,8 +11,11 @@ int return_int(const int return_val, const char *msg, corewar_t *main)
 {
     if (msg)
         write(STDERR_FILENO, msg, str_len(msg));
-    if (main)
+    if (main) {
+        if (main->program)
+            linkedlist_destroy(main->program, false);
         c_delete(main->alloc, true);
+    }
     return return_val;
 }
 
@@ -20,8 +23,11 @@ void *return_pointer(void *return_val, const char *msg, corewar_t *main)
 {
     if (msg)
         write(STDERR_FILENO, msg, str_len(msg));
-    if (main)
+    if (main) {
+        if (main->program)
+            linkedlist_destroy(main->program, false);
         c_delete(main->alloc, true);
+    }
     return return_val;
 }
 

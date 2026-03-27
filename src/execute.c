@@ -17,9 +17,15 @@ static void dump(corewar_t *corewar)
     printf("\n");
 }
 
+int stuff(corewar_t *corewar, program_t *program)
+{
+    printf("program %s\n", program->program_name);
+    return COREWAR_SUCC;
+}
+
 static void fill_functions(instr_func_t functions[INSTR_AMT])
 {
-    functions[INSTR_LIVE - 1] = NULL;
+    functions[INSTR_LIVE - 1] = &stuff;
     functions[INSTR_LD - 1] = NULL;
     functions[INSTR_ST - 1] = NULL;
     functions[INSTR_ADD - 1] = NULL;
@@ -84,11 +90,15 @@ static int exec_earliest_action(corewar_t *corewar, int earliest,
     instr_func_t functions[INSTR_AMT], program_t *earliest_prog)
 {
     int result = 0;
+    uint8_t code = 0;
 
     if (earliest < (corewar->per_live - corewar->since_last_live)) {
         corewar->cycles += (uint32_t)earliest;
-        result = functions[corewar->memory[earliest_prog->
-            program_counter] - 1](corewar, earliest_prog);
+        code = corewar->memory[earliest_prog->program_counter] - 1;
+        printf("%u", code);
+        if (!functions[code])
+            return COREWAR_FAIL;
+        result = functions[code](corewar, earliest_prog);
     } else {
         corewar->since_last_live = 0;
         corewar->cycles += (corewar->per_live - corewar->since_last_live);
