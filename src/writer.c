@@ -1,4 +1,4 @@
-/*/*
+/*
 ** EPITECH PROJECT, 2025
 ** corewar
 ** File description:
@@ -9,7 +9,6 @@
 
 static int validate_file_header(FILE *file)
 {
-
     return COREWAR_SUCC;
 }
 

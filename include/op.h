@@ -30,6 +30,7 @@
     /// Return codes
     #define COREWAR_SUCC 0
     #define COREWAR_FAIL 84
+    #define COREWAR_INTERNAL -1
 
     /// Global error messages
     #define ERR_ARG "Wrong amount of arguments! -h for help.\n"
@@ -147,8 +148,11 @@ int execute(corewar_t *corewar);
 int writer(corewar_t *corewar);
 
 /// Endianness & reading functions
-uint16_t char_to_uint16(const char *bytes);
-uint32_t char_to_uint32(const char *bytes);
-uint64_t char_to_uint64(const char *bytes);
+uint16_t char_to_uint16(const char *bytes, size_t start);
+uint32_t char_to_uint32(const char *bytes, size_t start);
+uint64_t char_to_uint64(const char *bytes, size_t start);
+int16_t char_to_int16(const char *bytes, size_t start);
+int32_t char_to_int32(const char *bytes, size_t start);
+int64_t char_to_int64(const char *bytes, size_t start);
 
 #endif
