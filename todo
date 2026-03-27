@@ -12,5 +12,20 @@ TODO :
 QUESTIONS DE FONCTIONNEMENT A REPONDRE POUR UN PROGRAMME QUI CORRESPOND A LA REALITE :
 1/ est-ce qu'on tue un programme dès qu'il dépasse le nombre de cycles autorisés, OU ALORS
 est-ce que c'est le SIGNAL émit par le "main" qui va tuer tout les process, indépendamment de leur volonté ?
+(répondu normalement)
+
 2/ est-ce que DELTA est appliqué en même temps qu'on loop (et reçoit des signaux de vie)
 ou alors est-ce que on update delta qu'une fois le signal envoyé et complètement fini ?
+(répondu normalement : update par tour, pas par signal envoyé)
+
+3/ si un programme va envoyer live mais que son cycle est == a CYCLE_TO_DIE,
+on exécute le live avant et on considère ensuite le programme comme en vie ?
+ou on exécute le live_signal avant ce qui (normalement) va tuer le programme ?
+(instr avant !)
+
+4/ quand est-ce qu'on décide qu'un programme est le gagnant ?
+est-ce qu'on le décide une fois que LIVE a entieremnet fini de potentiellement tuer tout les programmes
+(ce qui fait que 2 programmes pas en vie vont juste mourir et c'est fini)
+ou alors est-ce qu'on regarde apres avoir tué chaque programme (ce qui fait que, 2 programmes qui meurent, l'un sera
+déclaré gagnant alors qu'il était sur le point de mourir)
+(il faut forcément un gagnant ! mais je suis libre de méthode, 2 peuvent être ex-aequo ou 1 seul peut gagner par chance)

@@ -26,21 +26,21 @@ int stuff(corewar_t *corewar, program_t *program)
 static void fill_functions(instr_func_t functions[INSTR_AMT])
 {
     functions[INSTR_LIVE - 1] = &stuff;
-    functions[INSTR_LD - 1] = NULL;
-    functions[INSTR_ST - 1] = NULL;
-    functions[INSTR_ADD - 1] = NULL;
-    functions[INSTR_SUB- 1] = NULL;
-    functions[INSTR_AND - 1] = NULL;
-    functions[INSTR_OR - 1] = NULL;
-    functions[INSTR_XOR - 1] = NULL;
-    functions[INSTR_ZJMP - 1] = NULL;
-    functions[INSTR_LDI - 1] = NULL;
-    functions[INSTR_STI - 1] = NULL;
-    functions[INSTR_FORK - 1] = NULL;
-    functions[INSTR_LLD - 1] = NULL;
-    functions[INSTR_LLDI - 1] = NULL;
-    functions[INSTR_LFORK - 1] = NULL;
-    functions[INSTR_PRINT - 1] = NULL;
+    functions[INSTR_LD - 1] = &stuff;
+    functions[INSTR_ST - 1] = &stuff;
+    functions[INSTR_ADD - 1] = &stuff;
+    functions[INSTR_SUB- 1] = &stuff;
+    functions[INSTR_AND - 1] = &stuff;
+    functions[INSTR_OR - 1] = &stuff;
+    functions[INSTR_XOR - 1] = &stuff;
+    functions[INSTR_ZJMP - 1] = &stuff;
+    functions[INSTR_LDI - 1] = &stuff;
+    functions[INSTR_STI - 1] = &stuff;
+    functions[INSTR_FORK - 1] = &stuff;
+    functions[INSTR_LLD - 1] = &stuff;
+    functions[INSTR_LLDI - 1] = &stuff;
+    functions[INSTR_LFORK - 1] = &stuff;
+    functions[INSTR_PRINT - 1] = &stuff;
 }
 
 static void kill_program(corewar_t *corewar,
@@ -64,53 +64,73 @@ static void kill_program(corewar_t *corewar,
 
 static int cycle_live(corewar_t *corewar)
 {
-    size_t cycles = corewar->per_live - corewar->since_last_live;
     program_t *program = NULL;
 
     for (node_t *node = corewar->program->head; node;) {
         program = (program_t *)node->data;
-        if (corewar->programs_alive == 0) {
+        if (corewar->programs_alive == 1) {
             printf(PLAYER_WIN, program->program_number, program->program_name);
             return COREWAR_INTERNAL;
         }
-        if (program->since_last_live > corewar->per_live) {
+        if (program->since_last_live >= corewar->per_live) {
             kill_program(corewar, program, &node);
             continue;
         }
-        program->until_next_instr -= cycles;
         program->since_last_live = 0;
         corewar->live_signals += 1;
         printf(PLAYER_LIVE, program->program_number, program->program_name);
         node = node->next;
     }
+    corewar->per_live = CYCLE_TO_DIE - ((corewar->live_signals / NBR_LIVE) * CYCLE_DELTA);
+    corewar->since_last_live = 0;
     return COREWAR_SUCC;
+}
+
+static int exec_program_instr(corewar_t *corewar,
+    instr_func_t functions[INSTR_AMT], program_t *earliest_prog)
+{
+    uint8_t code = 0;
+
+    code = corewar->memory[earliest_prog->program_counter] - 1;
+    if (!functions[code])
+        return COREWAR_FAIL;
+    earliest_prog->until_next_instr = (uint16_t)400; // valeur au pif pour l'instant
+    return functions[code](corewar, earliest_prog);
+}
+
+static void update_global_cycles(corewar_t *corewar, int earliest)
+{
+    program_t *program = NULL;
+
+    for (node_t *node = corewar->program->head; node; node = node->next) {
+        program = (program_t *)node->data;
+        program->until_next_instr -= (uint16_t)earliest;
+        program->since_last_live += (uint16_t)earliest;
+    }
+    corewar->cycles += (uint32_t)earliest;
+    corewar->since_last_live += (uint16_t)earliest;
 }
 
 static int exec_earliest_action(corewar_t *corewar, int earliest,
     instr_func_t functions[INSTR_AMT], program_t *earliest_prog)
 {
-    int result = 0;
-    uint8_t code = 0;
+    bool signal_live = false;
 
-    if (earliest < (corewar->per_live - corewar->since_last_live)) {
-        corewar->cycles += (uint32_t)earliest;
-        code = corewar->memory[earliest_prog->program_counter] - 1;
-        printf("%u", code);
-        if (!functions[code])
-            return COREWAR_FAIL;
-        result = functions[code](corewar, earliest_prog);
-    } else {
-        corewar->since_last_live = 0;
-        corewar->cycles += (corewar->per_live - corewar->since_last_live);
-        result = cycle_live(corewar);
-        corewar->per_live = CYCLE_TO_DIE -
-            ((corewar->live_signals / NBR_LIVE) * CYCLE_DELTA);
+    if (corewar->programs_alive == 1) {
+        printf(PLAYER_WIN, earliest_prog->program_number, earliest_prog->program_name);
+        return COREWAR_INTERNAL;
     }
-    if (corewar->cycles >= corewar->max_cycles) {
+    if (corewar->per_live - corewar->since_last_live < earliest) {
+        earliest = (corewar->per_live - corewar->since_last_live);
+        signal_live = true;
+    }
+    if (corewar->max_cycles - corewar->cycles < (uint32_t)earliest) {
         dump(corewar);
         return COREWAR_INTERNAL;
     }
-    return result;
+    update_global_cycles(corewar, earliest);
+    return (!signal_live) ? exec_program_instr(corewar,
+        functions, earliest_prog) : cycle_live(corewar);
 }
 
 static int main_loop(corewar_t *corewar, instr_func_t functions[INSTR_AMT])

@@ -40,8 +40,8 @@
     #define ERR_WRITER "The writer found a file that does not conform.\n"
 
     /// Corewar print statements
-    #define PLAYER_LIVE "\"The player %zu(%s) is alive.\n\""
-    #define PLAYER_WIN "\"The player %zu(%s) has won.\n\""
+    #define PLAYER_LIVE "The player %zu(%s) is alive.\n"
+    #define PLAYER_WIN "The player %zu(%s) has won.\n"
 
     /// Help message
     #define HELP1 "USAGE\n"
