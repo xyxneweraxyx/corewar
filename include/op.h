@@ -171,20 +171,21 @@ int32_t char_to_int32(const char *bytes, size_t start);
 int64_t char_to_int64(const char *bytes, size_t start);
 
 /// Instruction functions
-int add(corewar_t *corewar, program_t *program);
-int and(corewar_t *corewar, program_t *program);
-int fork(corewar_t *corewar, program_t *program);
-int ld(corewar_t *corewar, program_t *program);
-int ldi(corewar_t *corewar, program_t *program);
-int lfork(corewar_t *corewar, program_t *program);
-int lld(corewar_t *corewar, program_t *program);
-int lldi(corewar_t *corewar, program_t *program);
-int or(corewar_t *corewar, program_t *program);
-int print(corewar_t *corewar, program_t *program);
-int st(corewar_t *corewar, program_t *program);
-int sti(corewar_t *corewar, program_t *program);
-int sub(corewar_t *corewar, program_t *program);
-int xor(corewar_t *corewar, program_t *program);
-int zjmp(corewar_t *corewar, program_t *program);
+int add_f(corewar_t *corewar, program_t *program);
+int and_f(corewar_t *corewar, program_t *program);
+int fork_f(corewar_t *corewar, program_t *program);
+int ld_f(corewar_t *corewar, program_t *program);
+int ldi_f(corewar_t *corewar, program_t *program);
+int lfork_f(corewar_t *corewar, program_t *program);
+int live_f(corewar_t *corewar, program_t *program);
+int lld_f(corewar_t *corewar, program_t *program);
+int lldi_f(corewar_t *corewar, program_t *program);
+int or_f(corewar_t *corewar, program_t *program);
+int print_f(corewar_t *corewar, program_t *program);
+int st_f(corewar_t *corewar, program_t *program);
+int sti_f(corewar_t *corewar, program_t *program);
+int sub_f(corewar_t *corewar, program_t *program);
+int xor_f(corewar_t *corewar, program_t *program);
+int zjmp_f(corewar_t *corewar, program_t *program);
 
 #endif

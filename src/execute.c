@@ -25,22 +25,22 @@ int stuff(corewar_t *corewar, program_t *program)
 
 static void fill_functions(instr_func_t functions[INSTR_AMT])
 {
-    functions[INSTR_LIVE - 1] = NULL;
-    functions[INSTR_LD - 1] = NULL;
-    functions[INSTR_ST - 1] = NULL;
-    functions[INSTR_ADD - 1] = NULL; 
-    functions[INSTR_SUB- 1] = NULL;
-    functions[INSTR_AND - 1] = NULL;
-    functions[INSTR_OR - 1] = NULL;
-    functions[INSTR_XOR - 1] = NULL;
-    functions[INSTR_ZJMP - 1] = NULL;
-    functions[INSTR_LDI - 1] = NULL;
-    functions[INSTR_STI - 1] = NULL;
-    functions[INSTR_FORK - 1] = NULL;
-    functions[INSTR_LLD - 1] = NULL;
-    functions[INSTR_LLDI - 1] = NULL;
-    functions[INSTR_LFORK - 1] = NULL;
-    functions[INSTR_PRINT - 1] = NULL;
+    functions[INSTR_LIVE - 1] = &live_f;
+    functions[INSTR_LD - 1] = &ld_f;
+    functions[INSTR_ST - 1] = &st_f;
+    functions[INSTR_ADD - 1] = &add_f;
+    functions[INSTR_SUB- 1] = &sub_f;
+    functions[INSTR_AND - 1] = &and_f;
+    functions[INSTR_OR - 1] = &or_f;
+    functions[INSTR_XOR - 1] = &xor_f;
+    functions[INSTR_ZJMP - 1] = &zjmp_f;
+    functions[INSTR_LDI - 1] = &ldi_f;
+    functions[INSTR_STI - 1] = &sti_f;
+    functions[INSTR_FORK - 1] = &fork_f;
+    functions[INSTR_LLD - 1] = &lld_f;
+    functions[INSTR_LLDI - 1] = &lldi_f;
+    functions[INSTR_LFORK - 1] = &lfork_f;
+    functions[INSTR_PRINT - 1] = &print_f;
 }
 
 static void kill_program(corewar_t *corewar,

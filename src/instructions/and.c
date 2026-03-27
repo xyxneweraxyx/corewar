@@ -6,3 +6,8 @@
 */
 
 #include "./../../include/op.h"
+
+int and_f(corewar_t *corewar, program_t *program)
+{
+    return COREWAR_SUCC;
+}
