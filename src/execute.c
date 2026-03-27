@@ -73,12 +73,30 @@ static int cycle_live(corewar_t *corewar)
     return COREWAR_SUCC;
 }
 
+static int exec_earliest_action(corewar_t *corewar, int earliest,
+    instr_func_t functions[INSTR_AMT], program_t *earliest_prog)
+{
+    int result = 0;
+
+    if (earliest < (corewar->per_live - corewar->since_last_live)) {
+        corewar->cycles += (uint32_t)earliest;
+        result = functions[corewar->memory[earliest_prog->program_counter] - 1](corewar, earliest_prog);
+    } else {
+        corewar->cycles += (corewar->per_live - corewar->since_last_live);
+        result = cycle_live(corewar);
+    }
+    if (corewar->cycles >= corewar->max_cycles) {
+        dump(corewar);
+        return COREWAR_INTERNAL;
+    }
+    return result;
+}
+
 static int main_loop(corewar_t *corewar, instr_func_t functions[INSTR_AMT])
 {
     program_t *program = NULL;
     program_t *earliest_prog = NULL;
     size_t earliest = (size_t)-1;
-    int result = 0;
 
     for (node_t *node = corewar->program->head; node; node = node->next) {
         program = (program_t *)node->data;
@@ -89,11 +107,7 @@ static int main_loop(corewar_t *corewar, instr_func_t functions[INSTR_AMT])
             earliest_prog = program;
         }
     }
-    if (earliest < (corewar->per_live - corewar->since_last_live))
-        result = functions[corewar->memory[earliest_prog->program_counter] - 1](corewar, earliest_prog);
-    else
-        result = cycle_live(corewar);
-    return result;
+    return exec_earliest_action(corewar, earliest, functions, earliest_prog);
 }
 
 int execute(corewar_t *corewar)
