@@ -102,6 +102,11 @@ typedef enum instr_e {
     INSTR_PRINT,
 } instr_t;
 
+typedef struct core_reg_s {
+    char c[REG_SIZE_INSIDE];
+    size_t num;
+} core_reg_t;
+
 typedef struct op_s {
     char *mnemonique;
     char nbr_args;
@@ -116,7 +121,7 @@ typedef struct program_s {
     uint16_t since_last_live;
     size_t program_number;
     size_t program_counter;
-    char registers[REG_NUMBER][REG_SIZE_INSIDE];
+    core_reg_t registers[REG_NUMBER];
     bool carry;
 } program_t;
 
