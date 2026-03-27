@@ -19,7 +19,22 @@ static void dump(corewar_t *corewar)
 
 static void fill_functions(instr_func_t functions[INSTR_AMT])
 {
-    // A remplir avec les vraies fonctions
+    functions[INSTR_LIVE - 1] = NULL;
+    functions[INSTR_LD - 1] = NULL;
+    functions[INSTR_ST - 1] = NULL;
+    functions[INSTR_ADD - 1] = NULL;
+    functions[INSTR_SUB- 1] = NULL;
+    functions[INSTR_AND - 1] = NULL;
+    functions[INSTR_OR - 1] = NULL;
+    functions[INSTR_XOR - 1] = NULL;
+    functions[INSTR_ZJMP - 1] = NULL;
+    functions[INSTR_LDI - 1] = NULL;
+    functions[INSTR_STI - 1] = NULL;
+    functions[INSTR_FORK - 1] = NULL;
+    functions[INSTR_LLD - 1] = NULL;
+    functions[INSTR_LLDI - 1] = NULL;
+    functions[INSTR_LFORK - 1] = NULL;
+    functions[INSTR_PRINT - 1] = NULL;
 }
 
 static void kill_program(corewar_t *corewar, program_t *program)
@@ -46,11 +61,11 @@ static int cycle_live(corewar_t *corewar)
     corewar->since_last_live = 0;
     for (node_t *node = corewar->program->head; node; node = node->next) {
         program = (program_t *)node->data;
-        program->until_next_instr -= cycles;
         if (program->since_last_live > corewar->per_live) {
             kill_program(corewar, program);
             continue;
         }
+        program->until_next_instr -= cycles;
         program->since_last_live = 0;
         corewar->live_signals += 1;
     }
@@ -68,13 +83,14 @@ static int main_loop(corewar_t *corewar, instr_func_t functions[INSTR_AMT])
     for (node_t *node = corewar->program->head; node; node = node->next) {
         program = (program_t *)node->data;
         if (program->until_next_instr < earliest &&
-            program->program_number < earliest_prog->program_number) {
+            (!earliest_prog ||
+                program->program_number < earliest_prog->program_number)) {
             earliest = program->until_next_instr;
             earliest_prog = program;
         }
     }
-    if (earliest < corewar->since_last_live)
-        result = functions[corewar->memory[earliest_prog->program_counter]](corewar, earliest_prog);
+    if (earliest < (corewar->per_live - corewar->since_last_live))
+        result = functions[corewar->memory[earliest_prog->program_counter] - 1](corewar, earliest_prog);
     else
         result = cycle_live(corewar);
     return result;
