@@ -5,7 +5,7 @@
 ** Generic functions to read big endian bytes
 */
 
-#include "./../include/op.h"
+#include "./../../include/op.h"
 #include "./endianness.h"
 
 uint16_t char_to_uint16(const char *bytes, size_t start)

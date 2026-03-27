@@ -13,8 +13,8 @@
     #include <stdint.h>
 
 // Functions
-static int is_little_endian(void);
-static void read_bytes(const char *bytes,
+int is_little_endian(void);
+void read_bytes(const char *bytes,
     uint8_t *result, size_t size, size_t start);
 
 #endif

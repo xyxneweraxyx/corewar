@@ -64,7 +64,11 @@
     #define MEM_SIZE 6 * 1024
     #define IDX_MOD 512
     #define MAX_ARGS_NUMBER 4
+
     #define COREWAR_EXEC_MAGIC 0xea83f3
+    #define PROG_NAME_LENGTH 128
+    #define COMMENT_LENGTH 2048
+    #define HEADER_LENGTH PROG_NAME_LENGTH + COMMENT_LENGTH + 8
 
     #define CYCLE_TO_DIE 1536
     #define CYCLE_DELTA 5
