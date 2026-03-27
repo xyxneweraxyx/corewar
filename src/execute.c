@@ -37,7 +37,8 @@ static void fill_functions(instr_func_t functions[INSTR_AMT])
     functions[INSTR_PRINT - 1] = NULL;
 }
 
-static void kill_program(corewar_t *corewar, program_t *program)
+static void kill_program(corewar_t *corewar,
+    program_t *program, node_t **loop_node)
 {
     program_t *pg = NULL;
     node_t *node = corewar->program->head;
@@ -48,6 +49,8 @@ static void kill_program(corewar_t *corewar, program_t *program)
             continue;
         break;
     }
+    corewar->programs_alive -= 1;
+    (*loop_node) = (*loop_node)->next;
     c_free(program->program_name, corewar->alloc);
     c_free(program, corewar->alloc);
     linkedlist_remove(corewar->program, node, false);
@@ -58,18 +61,22 @@ static int cycle_live(corewar_t *corewar)
     size_t cycles = corewar->per_live - corewar->since_last_live;
     program_t *program = NULL;
 
-    corewar->since_last_live = 0;
-    for (node_t *node = corewar->program->head; node; node = node->next) {
+    for (node_t *node = corewar->program->head; node;) {
         program = (program_t *)node->data;
+        if (corewar->programs_alive == 0) {
+            printf(PLAYER_WIN, program->program_number, program->program_name);
+            return COREWAR_INTERNAL;
+        }
         if (program->since_last_live > corewar->per_live) {
-            kill_program(corewar, program);
+            kill_program(corewar, program, &node);
             continue;
         }
         program->until_next_instr -= cycles;
         program->since_last_live = 0;
         corewar->live_signals += 1;
+        printf(PLAYER_LIVE, program->program_number, program->program_name);
+        node = node->next;
     }
-    corewar->per_live = CYCLE_TO_DIE - ((corewar->live_signals / NBR_LIVE) * CYCLE_DELTA);
     return COREWAR_SUCC;
 }
 
@@ -80,10 +87,14 @@ static int exec_earliest_action(corewar_t *corewar, int earliest,
 
     if (earliest < (corewar->per_live - corewar->since_last_live)) {
         corewar->cycles += (uint32_t)earliest;
-        result = functions[corewar->memory[earliest_prog->program_counter] - 1](corewar, earliest_prog);
+        result = functions[corewar->memory[earliest_prog->
+            program_counter] - 1](corewar, earliest_prog);
     } else {
+        corewar->since_last_live = 0;
         corewar->cycles += (corewar->per_live - corewar->since_last_live);
         result = cycle_live(corewar);
+        corewar->per_live = CYCLE_TO_DIE -
+            ((corewar->live_signals / NBR_LIVE) * CYCLE_DELTA);
     }
     if (corewar->cycles >= corewar->max_cycles) {
         dump(corewar);

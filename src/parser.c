@@ -67,7 +67,7 @@ static int handle_dump(corewar_t *corewar, int *i, char *number)
 {
     if (!number)
         return COREWAR_FAIL;
-    if (corewar->max_cycles == (uint32_t)-1)
+    if (corewar->max_cycles != (uint32_t)-1)
         return COREWAR_FAIL;
     if (confirm_number(number) == COREWAR_FAIL)
         return COREWAR_FAIL;
@@ -173,6 +173,7 @@ static int set_data(corewar_t *corewar)
         if (program->program_counter == (size_t)-1)
             place_champion(corewar, program);
         program->registers[0].num = program->program_number;
+        corewar->programs_alive += 1;
     }
     return COREWAR_SUCC;
 }

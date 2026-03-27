@@ -39,6 +39,10 @@
     #define ERR_EXEC "The execution of the corewar failed.\n"
     #define ERR_WRITER "The writer found a file that does not conform.\n"
 
+    /// Corewar print statements
+    #define PLAYER_LIVE "\"The player %zu(%s) is alive.\n\""
+    #define PLAYER_WIN "\"The player %zu(%s) has won.\n\""
+
     /// Help message
     #define HELP1 "USAGE\n"
     #define HELP2_1 "./corewar [-dump nbr_cycle] [[-n prog_number] "
@@ -143,6 +147,7 @@ typedef struct corewar_s {
     uint16_t per_live;
     uint16_t live_signals;
     uint16_t since_last_live;
+    uint8_t programs_alive;
 } corewar_t;
 
 typedef int (*instr_func_t)(corewar_t *, program_t *);
