@@ -68,7 +68,7 @@
     #define COREWAR_EXEC_MAGIC 0xea83f3
     #define PROG_NAME_LENGTH 128
     #define COMMENT_LENGTH 2048
-    #define HEADER_LENGTH PROG_NAME_LENGTH + COMMENT_LENGTH + 8
+    #define HEADER_LENGTH PROG_NAME_LENGTH + COMMENT_LENGTH + 16
 
     #define CYCLE_TO_DIE 1536
     #define CYCLE_DELTA 5
@@ -135,7 +135,7 @@ typedef struct program_s {
 typedef struct corewar_s {
     c_alloc_t *alloc;
     linkedlist_t *program; // linkedlist of program_t
-    char memory[MEM_SIZE];
+    uint8_t memory[MEM_SIZE];
     uint32_t cycles;
     uint32_t max_cycles;
     uint16_t since_last_live;

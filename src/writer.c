@@ -23,8 +23,18 @@ static uint32_t validate_file_header(FILE *file)
     return number;
 }
 
-static int write_file_data(FILE *file, corewar_t *corewar, program_t *program)
+static int write_file_data(FILE *file, corewar_t *corewar,
+    program_t *program, uint32_t prog_size)
 {
+    size_t pos = program->program_counter;
+    size_t space_left = (MEM_SIZE) - pos;
+
+    if (prog_size <= space_left) {
+        fread(corewar->memory + pos, 1, prog_size, file);
+        return COREWAR_SUCC;
+    }
+    fread(corewar->memory + pos, 1, space_left, file);
+    fread(corewar->memory, 1, prog_size - space_left, file);
     return COREWAR_SUCC;
 }
 
@@ -41,7 +51,8 @@ int writer(corewar_t *corewar)
             return COREWAR_FAIL;
         prog_size = validate_file_header(file);
         if (prog_size == (uint32_t)-1 ||
-            write_file_data(file, corewar, program) == COREWAR_FAIL) {
+            write_file_data(file, corewar,
+                program, prog_size) == COREWAR_FAIL) {
             fclose(file);
             return COREWAR_FAIL;
         }
