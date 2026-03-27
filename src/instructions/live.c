@@ -6,10 +6,11 @@
 */
 
 #include "./../../include/op.h"
+#include "./tools.h"
 
-int live_f(program_t *program)
+int live_f(corewar_t *corewar, program_t *program)
 {
-    program->since_last_live = 0;
+    args_place_t args = args_place_in_memory(corewar, program);
     printf(PLAYER_LIVE, program->program_number, program->program_name);
     return COREWAR_SUCC;
 }

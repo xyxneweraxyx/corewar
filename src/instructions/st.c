@@ -6,6 +6,7 @@
 */
 
 #include "./../../include/op.h"
+#include "./tools.h"
 
 int st_f(corewar_t *corewar, program_t *program)
 {
