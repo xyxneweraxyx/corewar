@@ -25,22 +25,22 @@ int stuff(corewar_t *corewar, program_t *program)
 
 static void fill_functions(instr_func_t functions[INSTR_AMT])
 {
-    functions[INSTR_LIVE - 1] = &live_f;
-    functions[INSTR_LD - 1] = &ld_f;
-    functions[INSTR_ST - 1] = &st_f;
-    functions[INSTR_ADD - 1] = &add_f;
-    functions[INSTR_SUB- 1] = &sub_f;
-    functions[INSTR_AND - 1] = &and_f;
-    functions[INSTR_OR - 1] = &or_f;
-    functions[INSTR_XOR - 1] = &xor_f;
-    functions[INSTR_ZJMP - 1] = &zjmp_f;
-    functions[INSTR_LDI - 1] = &ldi_f;
-    functions[INSTR_STI - 1] = &sti_f;
-    functions[INSTR_FORK - 1] = &fork_f;
-    functions[INSTR_LLD - 1] = &lld_f;
-    functions[INSTR_LLDI - 1] = &lldi_f;
-    functions[INSTR_LFORK - 1] = &lfork_f;
-    functions[INSTR_PRINT - 1] = &print_f;
+    functions[INSTR_LIVE - 1].prog = &live_f;
+    functions[INSTR_LD - 1].core_prog = &ld_f;
+    functions[INSTR_ST - 1].core_prog = &st_f;
+    functions[INSTR_ADD - 1].core_prog = &add_f;
+    functions[INSTR_SUB- 1].core_prog = &sub_f;
+    functions[INSTR_AND - 1].core_prog = &and_f;
+    functions[INSTR_OR - 1].core_prog = &or_f;
+    functions[INSTR_XOR - 1].core_prog = &xor_f;
+    functions[INSTR_ZJMP - 1].core_prog = &zjmp_f;
+    functions[INSTR_LDI - 1].core_prog = &ldi_f;
+    functions[INSTR_STI - 1].core_prog = &sti_f;
+    functions[INSTR_FORK - 1].core_prog = &fork_f;
+    functions[INSTR_LLD - 1].core_prog = &lld_f;
+    functions[INSTR_LLDI - 1].core_prog = &lldi_f;
+    functions[INSTR_LFORK - 1].core_prog = &lfork_f;
+    functions[INSTR_PRINT - 1].core_prog = &print_f;
 }
 
 static void kill_program(corewar_t *corewar,
@@ -76,9 +76,7 @@ static int cycle_live(corewar_t *corewar)
             kill_program(corewar, program, &node);
             continue;
         }
-        program->since_last_live = 0;
         corewar->live_signals += 1;
-        printf(PLAYER_LIVE, program->program_number, program->program_name);
         node = node->next;
     }
     corewar->per_live = CYCLE_TO_DIE - ((corewar->live_signals / NBR_LIVE) * CYCLE_DELTA);

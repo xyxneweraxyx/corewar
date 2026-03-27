@@ -114,6 +114,12 @@ typedef enum instr_e {
     INSTR_PRINT,
 } instr_t;
 
+typedef union instr_func_u {
+    int (*core_prog)(corewar_t *corewar, program_t *program);
+    int (*core)(corewar_t *corewar);
+    int (*prog)(program_t *program);
+} instr_func_t;
+
 typedef struct core_reg_s {
     char c[REG_SIZE_INSIDE];
     size_t num;
@@ -150,8 +156,6 @@ typedef struct corewar_s {
     uint8_t programs_alive;
 } corewar_t;
 
-typedef int (*instr_func_t)(corewar_t *, program_t *);
-
 // Imports
 extern const op_t op_tab[];
 
@@ -177,7 +181,7 @@ int fork_f(corewar_t *corewar, program_t *program);
 int ld_f(corewar_t *corewar, program_t *program);
 int ldi_f(corewar_t *corewar, program_t *program);
 int lfork_f(corewar_t *corewar, program_t *program);
-int live_f(corewar_t *corewar, program_t *program);
+int live_f(program_t *program);
 int lld_f(corewar_t *corewar, program_t *program);
 int lldi_f(corewar_t *corewar, program_t *program);
 int or_f(corewar_t *corewar, program_t *program);
