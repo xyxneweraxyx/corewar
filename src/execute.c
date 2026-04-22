@@ -6,6 +6,7 @@
 */
 
 #include "./../include/op.h"
+#include "./instructions/tools.h"
 
 static void dump(corewar_t *corewar)
 {
@@ -56,35 +57,57 @@ static void kill_program(corewar_t *corewar,
     linkedlist_remove(corewar->program, node, false);
 }
 
+static int cycle_live_win(corewar_t *corewar)
+{
+    program_t *program = NULL;
+
+    if (corewar->live_signals >= NBR_LIVE)
+        corewar->per_live -= CYCLE_DELTA;
+    corewar->live_signals = 0;
+    corewar->since_last_live = 0;
+    if (corewar->programs_alive <= 1) {
+        if (corewar->programs_alive == 1) {
+            program = (program_t *)corewar->program->head->data;
+            printf(PLAYER_WIN, program->program_number, program->program_name);
+        }
+        return COREWAR_INTERNAL;
+    }
+    return COREWAR_SUCC;
+}
+
 static int cycle_live(corewar_t *corewar)
 {
     program_t *program = NULL;
 
     for (node_t *node = corewar->program->head; node;) {
         program = (program_t *)node->data;
-        if (corewar->programs_alive == 1) {
-            printf(PLAYER_WIN, program->program_number, program->program_name);
-            return COREWAR_INTERNAL;
-        }
         if (program->since_last_live >= corewar->per_live) {
             kill_program(corewar, program, &node);
             continue;
         }
-        corewar->live_signals += 1;
         node = node->next;
     }
-    corewar->per_live = CYCLE_TO_DIE - ((corewar->live_signals / NBR_LIVE) * CYCLE_DELTA);
-    corewar->since_last_live = 0;
-    return COREWAR_SUCC;
+    return cycle_live_win(corewar);
 }
 
 static int exec_program_instr(corewar_t *corewar,
     instr_func_t functions[INSTR_AMT], program_t *earliest_prog)
 {
-    uint8_t code = 0;
+    uint8_t code = corewar->memory[earliest_prog->program_counter];
+    size_t old_pc = earliest_prog->program_counter;
+    args_place_t args = args_place_in_memory(corewar, earliest_prog);
+    int result = 0;
 
-    code = corewar->memory[earliest_prog->program_counter] - 1;
-    return functions[code](corewar, earliest_prog);
+    if (code == 0 || code > INSTR_AMT) {
+        earliest_prog->program_counter = (old_pc + 1) % MEM_SIZE;
+        earliest_prog->until_next_instr = 1;
+        return COREWAR_SUCC;
+    }
+    result = functions[code - 1](corewar, earliest_prog);
+    earliest_prog->until_next_instr = (uint16_t)op_tab[code].nbr_cycles;
+    if (earliest_prog->program_counter == old_pc)
+        earliest_prog->program_counter = (old_pc + args.instr_size) % MEM_SIZE;
+    return result;
 }
 
 static void update_global_cycles(corewar_t *corewar, int earliest)
@@ -93,7 +116,10 @@ static void update_global_cycles(corewar_t *corewar, int earliest)
 
     for (node_t *node = corewar->program->head; node; node = node->next) {
         program = (program_t *)node->data;
-        program->until_next_instr -= (uint16_t)earliest;
+        if (program->until_next_instr >= (uint16_t)earliest)
+            program->until_next_instr -= (uint16_t)earliest;
+        else
+            program->until_next_instr = 0;
         program->since_last_live += (uint16_t)earliest;
     }
     corewar->cycles += (uint32_t)earliest;
@@ -109,11 +135,12 @@ static int exec_earliest_action(corewar_t *corewar, int earliest,
         printf(PLAYER_WIN, earliest_prog->program_number, earliest_prog->program_name);
         return COREWAR_INTERNAL;
     }
-    if (corewar->per_live - corewar->since_last_live < earliest) {
+    if (corewar->per_live - corewar->since_last_live <= (uint16_t)earliest) {
         earliest = (corewar->per_live - corewar->since_last_live);
         signal_live = true;
     }
-    if (corewar->max_cycles - corewar->cycles < (uint32_t)earliest) {
+    if (corewar->max_cycles != (uint32_t)-1 &&
+        corewar->max_cycles - corewar->cycles <= (uint32_t)earliest) {
         dump(corewar);
         return COREWAR_INTERNAL;
     }
@@ -130,10 +157,11 @@ static int main_loop(corewar_t *corewar, instr_func_t functions[INSTR_AMT])
 
     for (node_t *node = corewar->program->head; node; node = node->next) {
         program = (program_t *)node->data;
-        if (program->until_next_instr < earliest &&
-            (!earliest_prog ||
-                program->program_number < earliest_prog->program_number)) {
+        if (program->until_next_instr < earliest) {
             earliest = program->until_next_instr;
+            earliest_prog = program;
+        } else if (program->until_next_instr == earliest && earliest_prog &&
+            program->program_number < earliest_prog->program_number) {
             earliest_prog = program;
         }
     }

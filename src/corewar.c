@@ -31,6 +31,15 @@ void *return_pointer(void *return_val, const char *msg, corewar_t *main)
     return return_val;
 }
 
+void encode_program_data(program_t *program)
+{
+    program->registers[0].num = program->program_number;
+    program->registers[0].c[0] = (char)(program->program_number >> 24);
+    program->registers[0].c[1] = (char)(program->program_number >> 16);
+    program->registers[0].c[2] = (char)(program->program_number >> 8);
+    program->registers[0].c[3] = (char)(program->program_number);
+}
+
 static corewar_t *create_corewar(void)
 {
     c_alloc_t *alloc = c_ini((uint16_t)100);

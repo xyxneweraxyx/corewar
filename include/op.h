@@ -158,6 +158,7 @@ extern const op_t op_tab[];
 // Functions
 
 /// Main functions
+void encode_program_data(program_t *program);
 int parse(int argc, char **argv, corewar_t *main);
 int execute(corewar_t *corewar);
 int writer(corewar_t *corewar);

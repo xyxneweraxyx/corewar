@@ -99,11 +99,10 @@ static program_t *find_next_program(corewar_t *corewar, program_t *current)
 
     for (node_t *node = corewar->program->head; node; node = node->next) {
         p = (program_t *)node->data;
-        if (p == current)
+        if (p == current || p->program_counter == (size_t)-1)
             continue;
-        if (p->program_counter == (size_t)-1)
-            continue;
-        dist = (p->program_counter - current->program_counter) % (MEM_SIZE);
+        dist = (p->program_counter - current->program_counter + MEM_SIZE)
+            % (MEM_SIZE);
         if (dist == 0)
             continue;
         if (dist < min_distance) {
@@ -113,7 +112,6 @@ static program_t *find_next_program(corewar_t *corewar, program_t *current)
     }
     return closest;
 }
-
 
 static size_t get_gap(corewar_t *corewar,
     program_t *p_cur, size_t *index_start)
@@ -164,7 +162,7 @@ static int set_data(corewar_t *corewar)
     for (node_t *node = corewar->program->head; node; node = node->next) {
         program = (program_t *)node->data;
         if (program->program_number == (size_t)-1) {
-            number = 0;
+            number = 1;
             for (; programs_using_number(corewar, number) > 0; number++);
             program->program_number = number;
         }
@@ -172,7 +170,7 @@ static int set_data(corewar_t *corewar)
             return COREWAR_FAIL;
         if (program->program_counter == (size_t)-1)
             place_champion(corewar, program);
-        program->registers[0].num = program->program_number;
+        encode_program_data(program);
         corewar->programs_alive += 1;
     }
     return COREWAR_SUCC;

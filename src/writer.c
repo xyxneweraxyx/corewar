@@ -7,9 +7,8 @@
 
 #include "./../include/op.h"
 
-static uint32_t validate_file_header(FILE *file)
+static uint32_t validate_file_header(FILE *file, char header[HEADER_LENGTH])
 {
-    char header[HEADER_LENGTH];
     uint32_t number = 0;
 
     if (fread(header, 1, HEADER_LENGTH, file) != HEADER_LENGTH)
@@ -21,6 +20,20 @@ static uint32_t validate_file_header(FILE *file)
     if (!number || number > (uint32_t)(MEM_SIZE))
         return (uint32_t)COREWAR_INTERNAL;
     return number;
+}
+
+static int set_champion_name(corewar_t *corewar, program_t *program,
+    char header[HEADER_LENGTH])
+{
+    char *name = c_alloc(sizeof(char), PROG_NAME_LENGTH + 1, corewar->alloc);
+
+    if (!name)
+        return COREWAR_FAIL;
+    for (int i = 0; i < PROG_NAME_LENGTH && header[4 + i]; i++)
+        name[i] = header[4 + i];
+    c_free(program->program_name, corewar->alloc);
+    program->program_name = name;
+    return COREWAR_SUCC;
 }
 
 static int write_file_data(FILE *file, corewar_t *corewar,
@@ -38,25 +51,37 @@ static int write_file_data(FILE *file, corewar_t *corewar,
     return COREWAR_SUCC;
 }
 
+static int write_champion(corewar_t *corewar, program_t *program)
+{
+    char header[HEADER_LENGTH];
+    uint8_t opcode = 0;
+    uint32_t prog_size = 0;
+    FILE *file = fopen(program->program_name, "rb");
+
+    if (!file)
+        return COREWAR_FAIL;
+    prog_size = validate_file_header(file, header);
+    if (prog_size == (uint32_t)-1 ||
+        set_champion_name(corewar, program, header) == COREWAR_FAIL ||
+        write_file_data(file, corewar, program, prog_size) == COREWAR_FAIL) {
+        fclose(file);
+        return COREWAR_FAIL;
+    }
+    opcode = corewar->memory[program->program_counter];
+    program->until_next_instr = (opcode >= 1 && opcode <= INSTR_AMT)
+        ? (uint16_t)op_tab[opcode].nbr_cycles : 1;
+    fclose(file);
+    return COREWAR_SUCC;
+}
+
 int writer(corewar_t *corewar)
 {
-    FILE *file = NULL;
     program_t *program = NULL;
-    uint32_t prog_size = 0;
 
     for (node_t *node = corewar->program->head; node; node = node->next) {
         program = (program_t *)node->data;
-        file = fopen(program->program_name, "rb");
-        if (!file)
+        if (write_champion(corewar, program) == COREWAR_FAIL)
             return COREWAR_FAIL;
-        prog_size = validate_file_header(file);
-        if (prog_size == (uint32_t)-1 ||
-            write_file_data(file, corewar,
-                program, prog_size) == COREWAR_FAIL) {
-            fclose(file);
-            return COREWAR_FAIL;
-        }
-        fclose(file);
     }
     return COREWAR_SUCC;
 }
