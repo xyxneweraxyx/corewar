@@ -7,42 +7,55 @@
 
 #include "./../../include/op.h"
 #include "./tools.h"
-#include "./tools.h"
 
-static size_t get_arg_size(char coding_byte, size_t arg)
+static size_t get_arg_size(uint8_t coding_byte, size_t arg, bool is_index)
 {
-    if (arg == 0)
-        return (size_t)((coding_byte >> 24));
-    if (arg == 1)
-        return (size_t)((coding_byte >> 16) & 0xff);
-    if (arg == 2)
-        return (size_t)((coding_byte >> 8) & 0xff);
-    if (arg == 3)
-        return (size_t)((coding_byte) & 0xff);
-    return (size_t)-1;
+    uint8_t type = (coding_byte >> (6 - arg * 2)) & 0x3;
+
+    if (type == 1)
+        return (size_t)REG_SIZE;
+    if (type == 2)
+        return is_index ? (size_t)IND_SIZE : (size_t)DIR_SIZE;
+    if (type == 3)
+        return (size_t)IND_SIZE;
+    return 0;
+}
+
+static args_place_t fill_with_coding_byte(args_place_t place,
+    size_t pos, uint8_t coding_byte, uint8_t code)
+{
+    size_t arg_size = 0;
+
+    for (int i = 0; i < op_tab[code].nbr_args; i++) {
+        arg_size = get_arg_size(coding_byte, (size_t)i, op_tab[code].is_index);
+        place.types[i] = (coding_byte >> (6 - i * 2)) & 0x3;
+        place.sizes[i] = arg_size;
+        place.args[i] = pos;
+        pos += arg_size;
+    }
+    return place;
 }
 
 args_place_t args_place_in_memory(corewar_t *corewar, program_t *program)
 {
-    args_place_t place = {(size_t)-1, (size_t)-1, (size_t)-1, (size_t)-1};
+    args_place_t place = {0};
     size_t pos = program->program_counter;
-    size_t coding_byte = 0;
-    size_t arg_size = 0;
-    uint8_t code = corewar->memory[pos] + 1;
+    uint8_t coding_byte = 0;
+    uint8_t code = corewar->memory[pos];
 
-    if (op_tab[code].has_coding_byte)
-        pos += 2;
-    else {
+    if (!op_tab[code].has_coding_byte) {
+        place.types[0] = 2;
+        place.sizes[0] = op_tab[code].is_index
+            ? (size_t)IND_SIZE : (size_t)DIR_SIZE;
         place.args[0] = pos + 1;
+        place.instr_size = 1 + place.sizes[0];
         return place;
     }
-    coding_byte = pos - 1;
-    for (int i = 0; i < op_tab[code].nbr_args; i++) {
-        arg_size = get_arg_size(coding_byte, i);
-        printf("prog = %s argsize = %zu\n", program->program_name, arg_size);
-        place.args[i] = pos + arg_size;
-        pos += arg_size;
-    }
+    coding_byte = corewar->memory[pos + 1];
+    place = fill_with_coding_byte(place, pos + 2, coding_byte, code);
+    place.instr_size = place.args[op_tab[code].nbr_args - 1]
+        + place.sizes[op_tab[code].nbr_args - 1]
+        - program->program_counter;
     return place;
 }
 
@@ -69,4 +82,3 @@ program_t *program_from_name(corewar_t *corewar, const char *name)
     }
     return NULL;
 }
-

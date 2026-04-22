@@ -9,12 +9,14 @@
     #define INSTR_TOOLS_H
 
     #include "./../../include/op.h"
-#include "./tools.h"
 
 // Typedefs
 
 typedef struct args_place_s {
-    size_t args[4];
+    size_t args[MAX_ARGS_NUMBER];
+    uint8_t types[MAX_ARGS_NUMBER];
+    size_t sizes[MAX_ARGS_NUMBER];
+    size_t instr_size;
 } args_place_t;
 
 // Functions
